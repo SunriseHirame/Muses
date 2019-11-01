@@ -1,0 +1,15 @@
+{
+    "name": "Hirame.Muses",
+    "references": [
+        "GUID:83b2b053c31a10140a0bf3ba6ffd6622"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

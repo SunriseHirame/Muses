@@ -1,0 +1,15 @@
+{
+    "name": "Hirame.Muses.Editor",
+    "references": [
+        "GUID:d674fd90d7e422f4fbc261a6cb13713c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

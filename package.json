@@ -1,0 +1,17 @@
+{
+  "name": "com.hirame.muses",
+  "version": "0.0.0",
+  "displayName": "Hirame Muses",
+  "description": "A Simple Camera Managerment System",
+  "unity": "2019.1",
+  "unityRelease": "0b5",
+  "dependencies": {
+ },
+ "keywords": [
+  ],
+  "author": {
+    "name": "Bernhard Miettinen",
+    "email": "bernhard.miettinen@gmail.com",
+    "url": "https://www.github.com/sunrisehirame"
+  } 
+}
