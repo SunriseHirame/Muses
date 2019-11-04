@@ -11,6 +11,8 @@ namespace Hirame.Muses
 
         public static MusesCamera MainCamera => GetOrCreate ().mainCamera;
 
+        public static VirtualCamera PreviewCamera;
+        
         internal static void SetMusesCamera (MusesCamera mCam)
         {
             GetOrCreate ().mainCamera = mCam;
@@ -28,6 +30,18 @@ namespace Hirame.Muses
 
         void ICameraUpdate.OnCameraUpdate ()
         {
+#if UNITY_EDITOR
+            if (Application.isPlaying == false)
+            {
+                if (PreviewCamera)
+                {
+                    var (pos, rotation) = PreviewCamera.GetDesiredPositionAndRotation ();
+                    PreviewCamera.PushState (pos, Quaternion.Euler (rotation));
+                }
+                return;
+            }
+#endif
+            
             if (mainCamera == false || virtualCameras.Count == 0)
                 return;
 
@@ -47,11 +61,7 @@ namespace Hirame.Muses
             var frameRotation = LerpRotation (
                 in mCamRotation, in vCamRotation, smooth, MainCamera.RotationBlendSpeed);
 
-            vCam.transform.SetPositionAndRotation (framePosition, frameRotation);
-            #if UNITY_EDITOR
-            if (Application.isPlaying == false)
-                return;
-            #endif
+            vCam.PushState (framePosition, frameRotation);
             mainCamTransform.SetPositionAndRotation (framePosition, frameRotation);
         }
 

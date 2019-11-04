@@ -58,6 +58,11 @@ namespace Hirame.Muses
             CameraSystem.TrackVirtualCamera (this);
         }
 
+        public void PushState (Vector3 position, Quaternion rotation)
+        {
+            AttachedTransform.SetPositionAndRotation (position, rotation);
+        }
+        
         private void OnEnable ()
         {
             CameraSystem.TrackVirtualCamera (this);

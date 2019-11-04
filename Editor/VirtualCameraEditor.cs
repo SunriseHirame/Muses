@@ -17,12 +17,15 @@ namespace Hirame.Muses.Editor
             vCamTransform = vCam.transform;
 
             CreatePreviewCamera ();
+            CameraSystem.PreviewCamera = vCam;
         }
 
         private void OnDisable ()
         {
             if (previewCam)
                 previewCam.enabled = false;
+            
+            CameraSystem.PreviewCamera = null;
         }
 
         private void CreatePreviewCamera ()
