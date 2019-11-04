@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using Hirame.Pantheon;
+using UnityEngine;
 
 namespace Hirame.Muses
 {
@@ -8,9 +10,15 @@ namespace Hirame.Muses
         [SerializeField] private int priority;
         [Range (0.1f, 10)]
         [SerializeField] private float smoothValue = 1f;
+
+        [SerializeField] private Follow follow;
+        [SerializeField] private LookAt lookAt;
         
+        [ShowIfNull]
         [SerializeField] private Transform attachedTransform;
 
+        public Transform AttachedTransform => attachedTransform;
+        
         public Vector3 Position => attachedTransform.position;
         public Quaternion Rotation => attachedTransform.rotation;
         public Vector3 RotationEuler => attachedTransform.eulerAngles;
@@ -32,6 +40,13 @@ namespace Hirame.Muses
         {
             get => smoothValue;
             set => smoothValue = Mathf.Clamp (value, 0, 10);
+        }
+
+        public (Vector3 position, Vector3 lookDirection) GetDesiredPositionAndRotation ()
+        {
+            var position = follow.GetPosition (this);
+            var lookDirection = lookAt.GetForwardVector (this);
+            return (position, lookDirection);
         }
 
         public void UpdateCamera ()
@@ -62,6 +77,12 @@ namespace Hirame.Muses
         public int CompareTo (VirtualCamera other)
         {
             return -(priority - other.priority);
+        }
+
+        private void OnDrawGizmosSelected ()
+        {
+            lookAt.OnDrawGizmos (this);
+            follow.OnDrawGizmos (this);
         }
     }
 

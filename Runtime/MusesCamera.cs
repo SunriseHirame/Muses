@@ -8,8 +8,14 @@ namespace Hirame.Muses
     {
         [SerializeField] private Camera mainCamera;
 
+        [SerializeField] private float globalPositionBlendSpeed = 40f;
+        [SerializeField] private float globalRotationBlendSpeed = 200f;
+        
         [Tooltip ("Snap the Camera to the position of first virtual camera")]
         [SerializeField] private bool inheritPosition = true;
+
+        public float PositionBlendSpeed => globalPositionBlendSpeed;
+        public float RotationBlendSpeed => globalRotationBlendSpeed;
         
         public Camera UnityCamera => mainCamera;
 

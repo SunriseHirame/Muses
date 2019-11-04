@@ -8,7 +8,7 @@ namespace Hirame.Muses
     {
         private MusesCamera mainCamera;
         private readonly PriorityQueue<VirtualCamera> virtualCameras = new PriorityQueue<VirtualCamera> ();
-        
+
         public static MusesCamera MainCamera => GetOrCreate ().mainCamera;
 
         internal static void SetMusesCamera (MusesCamera mCam)
@@ -25,25 +25,27 @@ namespace Hirame.Muses
         {
             GetOrCreate ().virtualCameras.Remove (vCam);
         }
-        
+
         public void OnCameraUpdate ()
         {
             if (mainCamera == false || virtualCameras.Count == 0)
                 return;
-            
+
             var mainCamTransform = mainCamera.transform;
 
             var mCamPosition = mainCamTransform.position;
-            var mCamRotation = mainCamTransform.eulerAngles;
+            var mCamRotation = mainCamTransform.forward;
 
             var vCam = virtualCameras.Peek ();
-            
-            var vCamPosition = vCam.Position;
-            var vCamRotation = vCam.transform.eulerAngles;
+
+            var (vCamPosition, vCamRotation) = vCam.GetDesiredPositionAndRotation ();
             var smooth = vCam.SmoothValue;
+
+            var framePosition = LerpPosition (
+                in mCamPosition, in vCamPosition, smooth, MainCamera.PositionBlendSpeed);
             
-            var framePosition = LerpPosition (in mCamPosition, in vCamPosition, smooth);
-            var frameRotation = LerpRotation (mCamRotation, vCamRotation, smooth);
+            var frameRotation = LerpRotation (
+                in mCamRotation, in vCamRotation, smooth, MainCamera.RotationBlendSpeed);
 
             mainCamTransform.SetPositionAndRotation (framePosition, frameRotation);
         }
@@ -51,23 +53,25 @@ namespace Hirame.Muses
         private Vector3 blendVelocity;
         private Vector3 blendVelocityAngular;
 
-        private Vector3 LerpPosition (in Vector3 from, in Vector3 to, float smooth)
+        private Vector3 LerpPosition (in Vector3 from, in Vector3 to, float smooth, float blend)
         {
-            return Vector3.SmoothDamp (from, to, ref blendVelocity, smooth, 20f, Time.smoothDeltaTime);
+            return Vector3.SmoothDamp (
+                from, to, ref blendVelocity, smooth, blend, Time.smoothDeltaTime);
         }
 
-        private Quaternion LerpRotation (Vector3 from, Vector3 to, float smooth)
+        private Quaternion LerpRotation (in Vector3 from, in Vector3 to, float smooth, float blend)
         {
-            if (from.x > 180)
-                from.x -= 360;
+            var lookDirection = Vector3.SmoothDamp (
+                from, to, ref blendVelocityAngular, smooth, blend, Time.smoothDeltaTime);
+            //lookDirection.z = 0;
+
+            var xz = Vector3.ProjectOnPlane (lookDirection, Vector3.up);
+            xz.Normalize ();
             
-            if (to.x > 180)
-                to.x -= 360;
-            
-            var frame = Vector3.SmoothDamp (from, to, ref blendVelocityAngular, smooth, 120f, Time.smoothDeltaTime);
-            frame.z = 0;
-            
-            return Quaternion.Euler (frame);
+            var xRot = Vector3.SignedAngle (xz, lookDirection, Vector3.Cross (Vector3.up, xz));
+            var yRot = Vector3.SignedAngle (Vector3.forward, xz, Vector3.up);
+
+            return Quaternion.Euler (xRot, yRot, 0);
         }
     }
 }

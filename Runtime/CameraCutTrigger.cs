@@ -6,7 +6,12 @@ namespace Hirame.Muses
     {
         [SerializeField] private VirtualCamera virtualCamera;
         [SerializeField] private int activateWithPriority = 500;
-        
+
+        private void OnEnable ()
+        {
+            transform.SetParent (null);
+        }
+
         private void OnTriggerEnter (Collider other)
         {
             Debug.Log ("CAM TRIGGER ENTER");
