@@ -6,7 +6,7 @@ namespace Hirame.Muses
 {
     public abstract class MusesBehavior
     {
-        public virtual void OnDrawGizmos (VirtualCamera virtualCamera) { }
+        public virtual void OnDrawGizmos (VirtualCamera virtualCamera) {}
     }
 
 }

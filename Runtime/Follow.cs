@@ -19,6 +19,15 @@ namespace Hirame.Muses
             
             return target.position + adjustedOffset;
         }
+
+        public override void OnDrawGizmos (VirtualCamera virtualCamera)
+        {
+            if (target == false)
+                return;
+            
+            Gizmos.color = Color.gray;
+            Gizmos.DrawLine (virtualCamera.transform.position, target.position);
+        }
     }
 
 }

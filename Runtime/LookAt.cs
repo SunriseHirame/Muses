@@ -23,11 +23,12 @@ namespace Hirame.Muses
 
         public override void OnDrawGizmos (VirtualCamera virtualCamera)
         {
+            if (target == false)
+                return;
             
             var adjustedOffset = space == CoordinateSpace.Local ? target.TransformVector (offset) : offset;
 
             Gizmos.color = Color.gray;
-            Gizmos.DrawLine (virtualCamera.transform.position, target.position);
             Gizmos.DrawLine (target.position, target.position + adjustedOffset);
             
             Gizmos.color = Color.cyan;

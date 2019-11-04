@@ -26,7 +26,7 @@ namespace Hirame.Muses
             GetOrCreate ().virtualCameras.Remove (vCam);
         }
 
-        public void OnCameraUpdate ()
+        void ICameraUpdate.OnCameraUpdate ()
         {
             if (mainCamera == false || virtualCameras.Count == 0)
                 return;
@@ -47,6 +47,11 @@ namespace Hirame.Muses
             var frameRotation = LerpRotation (
                 in mCamRotation, in vCamRotation, smooth, MainCamera.RotationBlendSpeed);
 
+            vCam.transform.SetPositionAndRotation (framePosition, frameRotation);
+            #if UNITY_EDITOR
+            if (Application.isPlaying == false)
+                return;
+            #endif
             mainCamTransform.SetPositionAndRotation (framePosition, frameRotation);
         }
 
