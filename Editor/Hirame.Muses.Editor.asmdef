@@ -1,7 +1,8 @@
 {
     "name": "Hirame.Muses.Editor",
     "references": [
-        "GUID:d674fd90d7e422f4fbc261a6cb13713c"
+        "GUID:d674fd90d7e422f4fbc261a6cb13713c",
+        "GUID:83b2b053c31a10140a0bf3ba6ffd6622"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

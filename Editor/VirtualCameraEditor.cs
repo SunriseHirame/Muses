@@ -8,40 +8,18 @@ namespace Hirame.Muses.Editor
     {
         private Transform vCamTransform;
         private VirtualCamera vCam;
-
-        private Camera previewCam;
         
         private void OnEnable ()
         {
             vCam = target as VirtualCamera;
             vCamTransform = vCam.transform;
 
-            CreatePreviewCamera ();
-            CameraSystem.PreviewCamera = vCam;
+            CameraSystem.SoloCamera = vCam;
         }
 
         private void OnDisable ()
         {
-            if (previewCam)
-                previewCam.enabled = false;
-            
-            CameraSystem.PreviewCamera = null;
-        }
-
-        private void CreatePreviewCamera ()
-        {
-            UnityEditorInternal.ComponentUtility.CopyComponent (Camera.main);
-            previewCam = vCam.GetComponent<Camera> ();
-            
-            if (previewCam == null)
-            {
-                previewCam = vCam.gameObject.AddComponent<Camera> ();
-            }
-          
-            UnityEditorInternal.ComponentUtility.PasteComponentValues (previewCam);
-            previewCam.depth = -90;
-            previewCam.enabled = true;
-            previewCam.hideFlags = HideFlags.HideAndDontSave;
+            CameraSystem.SoloCamera = null;
         }
 
         public override void OnInspectorGUI ()
@@ -55,7 +33,7 @@ namespace Hirame.Muses.Editor
                 if (scope.changed)
                 {
                     serializedObject.ApplyModifiedProperties ();
-                    vCam.UpdateCamera ();
+                    vCam.SetDirty ();
                 }
             }
         }

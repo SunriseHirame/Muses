@@ -1,10 +1,9 @@
-﻿using System;
-using Hirame.Pantheon;
+﻿using Hirame.Pantheon;
 using UnityEngine;
 
 namespace Hirame.Muses
 {
-    [ExecuteInEditMode]
+    [ExecuteAlways]
     public class VirtualCamera : MonoBehaviour, System.IComparable<VirtualCamera>
     {
         [SerializeField] private int priority;
@@ -32,7 +31,7 @@ namespace Hirame.Muses
                     return;
                 
                 priority = value;
-                UpdateCamera ();
+                SetDirty ();
             }
         }
 
@@ -42,14 +41,15 @@ namespace Hirame.Muses
             set => smoothValue = Mathf.Clamp (value, 0, 10);
         }
 
-        public (Vector3 position, Vector3 lookDirection) GetDesiredPositionAndRotation ()
+        public (Vector3 position, Vector3 lookDirection) UpdatePositionAndRotation ()
         {
             var position = follow.GetPosition (this);
-            var lookDirection = lookAt.GetForwardVector (this);
+            var lookDirection = lookAt.GetLookDirection (this);
+            
             return (position, lookDirection);
         }
 
-        public void UpdateCamera ()
+        public void SetDirty ()
         {
             if (!enabled)
                 return;

@@ -10,14 +10,14 @@ namespace Hirame.Muses
         [SerializeField] private Vector3 offset;
         [SerializeField] private CoordinateSpace space;
 
-        public Vector3 GetForwardVector (VirtualCamera virtualCamera)
+        public Vector3 GetLookDirection (VirtualCamera virtualCamera)
         {
             if (target == false)
                 return virtualCamera.AttachedTransform.forward;
 
             var adjustedOffset = space == CoordinateSpace.Local ? target.TransformVector (offset) : offset;
-
-            var direction = target.position - virtualCamera.AttachedTransform.position + adjustedOffset;
+            var direction = target.position + adjustedOffset - virtualCamera.AttachedTransform.position;
+            
             return direction.normalized;
         }
 

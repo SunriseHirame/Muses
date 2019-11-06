@@ -1,6 +1,8 @@
 ﻿using Hirame.Pantheon;
 using Hirame.Pantheon.Core;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.XR;
 
 namespace Hirame.Muses
 {
@@ -11,7 +13,31 @@ namespace Hirame.Muses
 
         public static MusesCamera MainCamera => GetOrCreate ().mainCamera;
 
-        public static VirtualCamera PreviewCamera;
+#if UNITY_EDITOR
+        public static VirtualCamera SoloCamera;
+        private static Camera previewCamera;
+
+        public static Camera GerOrCreatePreviewCamera ()
+        {
+            if (!previewCamera)
+            {
+                var previewGo = GameObject.Find ("Preview Camera");
+                if (previewGo)
+                    previewCamera = previewGo.GetComponent<Camera> ();
+                
+                if (!previewCamera)
+                    previewCamera = new GameObject ("Preview Camera").AddComponent<Camera> ();
+                
+                previewCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            }
+            
+            UnityEditorInternal.ComponentUtility.CopyComponent (Camera.main);
+            UnityEditorInternal.ComponentUtility.PasteComponentValues (previewCamera);
+
+            previewCamera.depth = -100;
+            return previewCamera;
+        }
+#endif
         
         internal static void SetMusesCamera (MusesCamera mCam)
         {
@@ -31,38 +57,27 @@ namespace Hirame.Muses
         void ICameraUpdate.OnCameraUpdate ()
         {
 #if UNITY_EDITOR
-            if (Application.isPlaying == false)
-            {
-                if (PreviewCamera)
-                {
-                    var (pos, rotation) = PreviewCamera.GetDesiredPositionAndRotation ();
-                    PreviewCamera.PushState (pos, Quaternion.Euler (rotation));
-                }
+            if (Editor_UpdatePreview ())
                 return;
-            }
 #endif
             
             if (mainCamera == false || virtualCameras.Count == 0)
                 return;
 
             var mainCamTransform = mainCamera.transform;
+            var virtualCamera = virtualCameras.Peek ();
+            var smooth = virtualCamera.SmoothValue;
 
-            var mCamPosition = mainCamTransform.position;
-            var mCamRotation = mainCamTransform.forward;
-
-            var vCam = virtualCameras.Peek ();
-
-            var (vCamPosition, vCamRotation) = vCam.GetDesiredPositionAndRotation ();
-            var smooth = vCam.SmoothValue;
+            var (vCamPosition, vCamLookDirection) = virtualCamera.UpdatePositionAndRotation ();
 
             var framePosition = LerpPosition (
-                in mCamPosition, in vCamPosition, smooth, MainCamera.PositionBlendSpeed);
+                mainCamTransform.position, in vCamPosition, smooth, MainCamera.PositionBlendSpeed);
             
             var frameRotation = LerpRotation (
-                in mCamRotation, in vCamRotation, smooth, MainCamera.RotationBlendSpeed);
+                mainCamTransform.forward, in vCamLookDirection, smooth, MainCamera.RotationBlendSpeed);
 
-            vCam.PushState (framePosition, frameRotation);
             mainCamTransform.SetPositionAndRotation (framePosition, frameRotation);
+            virtualCamera.PushState (framePosition, frameRotation);
         }
 
         private Vector3 blendVelocity;
@@ -78,15 +93,44 @@ namespace Hirame.Muses
         {
             var lookDirection = Vector3.SmoothDamp (
                 from, to, ref blendVelocityAngular, smooth, blend, Time.smoothDeltaTime);
-            //lookDirection.z = 0;
-
-            var xz = Vector3.ProjectOnPlane (lookDirection, Vector3.up);
-            xz.Normalize ();
             
-            var xRot = Vector3.SignedAngle (xz, lookDirection, Vector3.Cross (Vector3.up, xz));
-            var yRot = Vector3.SignedAngle (Vector3.forward, xz, Vector3.up);
+            return MusesUtility.GetCameraLookRotation (lookDirection);
+        }
 
-            return Quaternion.Euler (xRot, yRot, 0);
+        private static bool Editor_UpdatePreview ()
+        {
+            if (Application.isPlaying)
+            {
+                if (previewCamera && previewCamera.depth != -100)
+                {
+                    previewCamera.depth = -100;
+                }
+
+                return false;
+            }
+            
+            if (SoloCamera)
+            {
+                GerOrCreatePreviewCamera ();
+
+                if (previewCamera.depth != 100)
+                {
+                    previewCamera.depth = 100;
+                    Debug.Log ("ENABLE PREVIEW");
+                }
+
+                var (pos, lookDirection) = SoloCamera.UpdatePositionAndRotation ();
+                previewCamera.transform.SetPositionAndRotation (pos, MusesUtility.GetCameraLookRotation (lookDirection));
+                return true;
+            }
+
+            if (previewCamera && previewCamera.depth != -100)
+            {
+                Debug.Log ("DISABLE PREVIEW");
+                previewCamera.depth = -100;
+            }
+
+            return false;
         }
     }
 }
