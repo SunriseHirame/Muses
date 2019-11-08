@@ -1,8 +1,6 @@
 ﻿using Hirame.Pantheon;
 using Hirame.Pantheon.Core;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.XR;
 
 namespace Hirame.Muses
 {
